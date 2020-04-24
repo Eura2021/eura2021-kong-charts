@@ -1,5 +1,9 @@
 dependencies:
-- name: postgresql
-  version: 8.6.8
-  repository: https://charts.bitnami.com/bitnami
-  condition: postgresql.enabled
+#
+# z: vain DBLESS-mode
+#
+
+# - name: postgresql
+#  version: 8.6.8
+#  repository: https://charts.bitnami.com/bitnami
+#  condition: postgresql.enabled

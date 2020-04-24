@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: kong
+data:
+  nutcracker.conf: |
+    pool:
+      listen: 127.0.0.1:6379
+      hash: fnv1a_64
+      distribution: ketama
+      redis: true
+      redis_auth: ${redis-password}
+      auto_eject_hosts: true
+      timeout: 2000
+      server_retry_timeout: 5000
+      server_failure_limit: 1
+      server_connections: 40
+      preconnect: true
+      servers:
+        - 127.0.0.1:6380:1
+  stunnel.conf: |
+    # /usr/local/etc/stunnel/stunnel.conf
+    # cert = /etc/stunnel/private.pem
+    pid = /var/run/stunnel.pid
+    client = yes
+    [redis-master]
+    connect = redis-master:6379
+    accept = 127.0.0.1:6380

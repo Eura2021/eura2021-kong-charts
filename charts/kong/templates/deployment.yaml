@@ -49,10 +49,23 @@ spec:
         - name: {{ . }}
       {{- end }}
       {{- end }}
-      {{- if not (eq .Values.env.database "off") }}
       initContainers:
+      {{- if not (eq .Values.env.database "off") }}
       {{- include "kong.wait-for-db" . | nindent 6 }}
       {{ end }}
+      - name: init-container
+        image: init-utils
+        command:
+          - /envsubst.sh
+        volumeMounts:
+          - mountPath: /var/data/src
+            name: redis-config-template
+          - mountPath: /var/data/target
+            name: redis-config
+        {{- if .Values.redis.passwordIsInSecret }}
+          - mountPath: /var/data/secrets
+            name: redis-password
+        {{ end }}
       containers:
       {{- if .Values.ingressController.enabled }}
       {{- include "kong.controller-container" . | nindent 6 }}
@@ -198,6 +211,27 @@ spec:
 {{ toYaml .Values.livenessProbe | indent 10 }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
+      - name: websocket-gateway
+        image: gateway-ws:latest
+        env:
+          - name: port
+            value: "8080"
+          - name: redis__host
+            value: localhost
+      - name: twemproxy
+        image: softonic/twemproxy
+        volumeMounts:
+          - mountPath: /etc/twemproxy
+            name: redis-config
+        command:
+          - nutcracker
+          - -c
+          - /etc/twemproxy/nutcracker.conf
+      - name: stunnel
+        image: dweomer/stunnel
+        volumeMounts:
+          - mountPath: /etc/stunnel
+            name: redis-config
     {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
@@ -211,4 +245,14 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
       volumes:
+        - name: redis-config-template
+          configMap:
+            name: redis-config
+        - name: redis-config
+          emptyDir: {}
+      {{- if .Values.redis.passwordIsInSecret }}
+        - name: redis-password
+          secret:
+            secretName: {{ .Values.redis.passwordSecretName }}
+      {{ end }}
       {{- include "kong.volumes" . | nindent 8 -}}

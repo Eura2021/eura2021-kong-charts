@@ -8,6 +8,10 @@
 # - Miscellaneous parameters
 # - Kong Enterprise parameters
 
+redis:
+  passwordIsInSecret: true
+  passwordSecretName: redis-password
+
 # -----------------------------------------------------------------------------
 # Kong parameters
 # -----------------------------------------------------------------------------
