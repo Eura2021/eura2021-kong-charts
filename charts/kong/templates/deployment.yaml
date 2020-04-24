@@ -54,7 +54,7 @@ spec:
       {{- include "kong.wait-for-db" . | nindent 6 }}
       {{ end }}
       - name: init-container
-        image: init-utils
+        image: {{ .Values.initUtils }}
         command:
           - /envsubst.sh
         volumeMounts:
@@ -212,7 +212,7 @@ spec:
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       - name: websocket-gateway
-        image: gateway-ws:latest
+        image: {{ .Values.websocketGateway }}
         env:
           - name: port
             value: "8080"
