@@ -17,26 +17,9 @@ data:
       preconnect: true
       servers:
         - /tmp/sockets/stunnel-write.sock:1
-    read:
-      listen: /tmp/sockets/redis-read.sock
-      redis: true
-      redis_auth: ${redis-password}
-      auto_eject_hosts: true
-      timeout: 2000
-      server_retry_timeout: 5000
-      server_failure_limit: 1
-      server_connections: 20
-      preconnect: true
-      servers:
-        - /tmp/sockets/stunnel-write.sock:1
-        - /tmp/sockets/stunnel-read.sock:1
   stunnel.conf: |
     pid = /var/run/stunnel.pid
     [redis-master]
     client = yes
     connect = redis-master:6379
     accept = /tmp/sockets/stunnel-write.sock
-    [redis-slave]
-    client = yes
-    connect = redis-slave:6379
-    accept = /tmp/sockets/stunnel-read.sock
