@@ -204,6 +204,8 @@ spec:
         {{- end }}
         {{- end }}
         volumeMounts:
+          - name: unix-sockets
+            mountPath: /tmp/sockets
         {{- include "kong.volumeMounts" . | nindent 10 }}
         readinessProbe:
 {{ toYaml .Values.readinessProbe | indent 10 }}
@@ -223,15 +225,21 @@ spec:
         volumeMounts:
           - mountPath: /etc/twemproxy
             name: redis-config
+          - name: unix-sockets
+            mountPath: /tmp/sockets
         command:
           - nutcracker
           - -c
           - /etc/twemproxy/nutcracker.conf
       - name: stunnel
-        image: dweomer/stunnel
+        image: vimagick/stunnel
+        command: stunnel
+        args: ""
         volumeMounts:
           - mountPath: /etc/stunnel
             name: redis-config
+          - name: unix-sockets
+            mountPath: /tmp/sockets
     {{- if .Values.affinity }}
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
@@ -249,6 +257,8 @@ spec:
           configMap:
             name: redis-config
         - name: redis-config
+          emptyDir: {}
+        - name: unix-sockets
           emptyDir: {}
       {{- if .Values.redis.passwordIsInSecret }}
         - name: redis-password
